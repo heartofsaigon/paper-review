@@ -1,31 +1,31 @@
 ---
 title: "Bayesian Optimization"
+author: Nam-Anh Tran
 date: '`r Sys.Date()`'
 date-format: "MMMM D, YYYY"
-author: Nam-Anh Tran
 format:
   pdf:
     aft-pdf:
-    documentclass: article
-    pagestyle: headings
-    papersize: us-letter
+    documentclass: scrartcl
+    #pagestyle: headings
+    #papersize: us-letter
     toc: false
     toc-depth: 3
     mathspec: true
     extra_dependencies: ["flatter"]
-    classoption: [onecolumn, portrait]
+    classoption: [onecolumn, portrait, abstract]
     mainfont: Times New Roman
     fontsize: 12pt
     include-in-header:
       - text: |
-          \usepackage{setspace}
+          \usepackage[nodisplayskipstretch]{setspace}
           \usepackage{float}
           \usepackage{fontspec}
           \usepackage{fvextra} 
           \AtBeginEnvironment{Shaded}{\singlespace \footnotesize \vspace{-1mm}}
           \DefineVerbatimEnvironment{Highlighting}{Verbatim}{breaklines,commandchars=\\\{\}}
 highlight-style: tango
-linestretch: 1.5
+#linestretch: 2
 number-sections: true
 section-numbering: 1.1.a
 fig-cap-location: top
@@ -35,42 +35,25 @@ fig-pos: false
 shift-heading-level-by: 0
 link-citations: true
 linkcolor: red
-margin-top: 3cm
-margin-bottom: 3cm
-margin-left: 2.5cm
-margin-right: 2.5cm
-indent: false
+margin-top: 2.5cm
+margin-bottom: 2.5cm
+margin-left: 2cm
+margin-right: 2cm
+indent: true
 bibliography: ../references.bib
 csl: ../vancouver.csl
 editor: source
 editor_options: 
   chunk_output_type: console
-knitr:
-  opts_chunk: 
-    warning: false
-    message: false
-    echo: false
-    eval: true
-    code-line-numbers: true
-    tidy: true
-    tidy-opts:
-      - blank: false
-    fig-align: center
-    fig-show: hold # this make the r output does not split the chunk
+execute: 
+  warning: false
+  message: false
+  echo: false
 ---
 
+\doublespacing
 
-
-
-
-# Gaussian process
-
-
-```{r}
-n = 100
-X = seq(0,10, length = n)|> matrix(ncol = 1)
-
-```
+# Summary 
 
 
 
@@ -90,8 +73,25 @@ X = seq(0,10, length = n)|> matrix(ncol = 1)
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+\clearpage
+ 
 # References {-}
 
+\singlespacing
 
 
 
