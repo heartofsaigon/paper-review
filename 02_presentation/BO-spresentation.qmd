@@ -1,0 +1,297 @@
+---
+title: "Bayesian Optimisation"
+author: "Nam-Anh Tran"
+format: 
+  revealjs:
+    center: true
+    theme: dark
+    logo: mcgilllogo.png
+    fontsize: 26pt
+editor: source
+---
+
+
+## Motivations
+
+Consider a "well behaved" function $f:\mathfrak{X} \to \mathbb{R}$, where $\mathfrak X \subseteq \mathbb{R}^d$ is a bounded domain. 
+
+$$
+x_M = \arg\min_{x \in \mathfrak X} f(x)
+$$
+
+How to optimize $f$ if:
+
+-   $f$ is explicitly unknown and multimodal.
+-   Evaluations of $f$ are expensive.
+
+## Expensive functions
+
+**Parameter tuning in ML algorithms**
+
+![](pic01.png)
+
+-   Number of layers/units per layer.
+-   Weight penalties
+-   Learning rates, etc.
+
+## Expensive functions
+
+**Design of experiments: gene optimization**
+
+![](pic02.png){fig-align="center" width="45%"}
+
+-   Optimize genes \[tweak the DNA sequence\] (ATTGGTUGA...) to best enable the cell-factory to operate most efficiently (yeast to produce insulin or vaccines.)
+
+::: aside
+These tweaks might include changing codons, promoter strength, regulatory elements, etc.
+:::
+
+## Expensive functions
+
+**Dose finding in drug development**
+
+:::{.column width="50%"}
+Find the MTD which maximizes the efficacy but the toxicity is still under control.
+
+- Pre-specified models must hold monotonicity. 
+- However, it may not hold and we do not have information before observing data.
+- We even don't have enough data to assess this assumption. 
+:::
+
+:::{.column width="50%"}
+![](pic03.png){fig-align="center"}
+:::
+
+## What to do?
+
+-   **Option 1:** Use previous knowledge to select the parameters at hand. Perhaps not very scientific but still in use.
+-   **Option 2:** Grid search. It is very computationally expensive and does not reuse knowledge from previous runs.
+-   **Option 3:** Pure Random search. It is better than grid search in various senses but still expensive.
+
+## Can we do better?
+
+-   Find the optimum of function $f$ in the interval $[0,1]$.
+-   $f$ is continuous.
+
+## 
+
+![](pic04.png){fig-align="center" width="70%"}
+
+- Where is the minimum of $f$?  
+- There is not enough information to know the minimum point; more evaluations are required.  
+- Where should we take the next evaluation?  
+- This implies a level of uncertainty regarding the function we are minimizing.
+
+## 
+
+![](pic05.png){fig-align="center" width="70%"}
+
+## 
+
+![](pic06.png){fig-align="center" width="70%"}
+
+## 
+
+![](pic07.png){fig-align="center" width="70%"}
+
+## 
+
+![](pic08.png){fig-align="center" width="70%"}
+
+## 
+
+![](pic09.png){fig-align="center" width="70%"}
+
+## 
+
+![](pic10.png){fig-align="center" width="70%"}
+
+
+- Is the current observed minimizer true?
+- If not, where should we evaluate next? 
+- How to account for these two features in the policy function? 
+
+## General ideas: Surrogate modelling
+
+-   Use a surrogate model of $f$ to carry out the optimization.
+-   Define a utility function to collect new data points satisfying some optimality: **Optimization** $\to$ **decision**.
+-   Study decision problems as inference using the surrogate model. A probabilistic model can calibrate both first-ordered and second-ordered uncertainty.
+
+::: aside
+"I want to find the minimum of an expensive black-box function (like training accuracy), but I can only evaluate it a few times."
+:::
+
+## Surrogate model: Gaussian process
+
+Infinite-dimensional probability density, such that each linear finite-dimensional restriction is multivariate Gaussian.
+
+-   Model $f(x) \sim GP(\mu(x), K(x,x'))$ is determined by the **mean function** and **covariance function**.
+-   Allows tractable Bayesian modelling of functions without specifying a particular finite basis (i.e. $\sum_{i=1}^Mw_i\phi_i(x)$) that might not be flexible enough to fit complex functions.
+-   Closed-form predictive distribution, i.e. conditional distribution of new data conditional on observed data.
+
+## Surrogate model: Gaussian process {.scrollable}
+
+$$
+p(f, \boldsymbol y) = GP\bigg( \begin{bmatrix}f \\ \boldsymbol y \end{bmatrix};
+\begin{bmatrix}\mu \\ \boldsymbol m \end{bmatrix},
+\begin{bmatrix}K & \kappa^{\top} \\  \kappa & \boldsymbol C \end{bmatrix}
+\bigg)
+$$ 
+
+then $p(f|\boldsymbol y) = GP(f; \mu_D, K_D)$, where
+
+$$
+\begin{aligned}
+&\mu_D = \mu(x) + \kappa(x)^{\top}\boldsymbol C^{-1}(\boldsymbol y-\boldsymbol m)\\
+&K_D(x, x') = K(x,x') - \kappa(x)^{\top}\boldsymbol C^{-1}\kappa(x')
+\end{aligned}
+$$
+
+There are multiple forms of covariance functions we can use to describe the correlation between any two support points, e.g. squared-exponential, Matern, periodic, etc.
+
+## 
+
+![](pic11.png){fig-align="center" width="70%"}
+
+To decide where we should evaluate next, we need a utility (acquisition) function that balance:
+
+-   Exploration: Seek places with high variance
+-   Exploitation: Seek places with low mean (assume that we are minimizing the function).
+
+## Acquisition functions
+
+There are many acquisition functions used in practice. We focus on the expected improvement (EI), the most used acquisition function. 
+
+
+$$
+\begin{aligned}
+&I(x) = \max\{y_{min} - f(x), 0\}\\
+&x' = \arg\min_{x \in \mathfrak X}E[I(x)],
+\end{aligned}
+$$ 
+
+We can show that 
+
+$$
+E(I(x)) = (y_{min} - \hat f(x))\Phi\bigg[\frac{y_{min} - \hat{f}(x)}{\hat{\sigma}(x)}\bigg] + \hat{\sigma}(x)\phi\bigg[\frac{y_{min}-\hat {f}(x)}{\hat{\sigma}(x)}\bigg]
+$$
+
+## How does it work? 
+
+![](13.png){fig-align="center" width="70%"}
+
+## 
+
+![](14.png){fig-align="center" width="70%"}
+
+## 
+
+![](15.png){fig-align="center" width="70%"}
+
+## 
+
+![](16.png){fig-align="center" width="70%"}
+
+## 
+
+![](17.png){fig-align="center" width="70%"}
+
+## 
+
+![](18.png){fig-align="center" width="70%"}
+
+## 
+
+![](19.png){fig-align="center" width="70%"}
+
+## 
+
+![](20.png){fig-align="center" width="70%"}
+
+(Let's look at the code)
+
+## Some extensions 
+
+- The model should account for white noise.
+- Consider the scale parameter in the covariance matrix to widen the range. 
+
+![](21.png){fig-align="center" width="70%"}
+
+## Some extensions
+
+- The mean of GP is a function with parameters (e.g. linear, quadratic, cubic, etc.).
+- Using the full Bayesian approach is time-consuming. 
+- "Plug-in" approach (MLE of the scale parameter) can turn Gaussian into Student-t. This is not a problem if $n$ is large enough. 
+
+## Constrained Optimization
+
+$$
+x' = \arg\min_{x \in \mathfrak{X}}f(x)\quad \text{subject to}\quad c(x) \le 0
+$$
+
+- The idea is to modify acquisition function to account for  only available region.  
+- Instead of Expected improvement, we use integrated expected conditional improvement. 
+
+## {.smaller}
+
+The conditional improvement is 
+
+$$
+I(x|x_{n+1}) = \max\{y_{min} - f(x|x_{n+1}), 0\}
+$$
+
+- $E(f(x|x_{n+1})|D_n) = \mu_n(x)$ since $y_{n+1}$ has not come yet. 
+- $V(f(x|x_{n+1})|D_n) = \sigma^2_{n+1}(x)$ follows the ordinary GP predictive equation.
+
+We have the expected conditional improvement:
+
+$$
+\begin{aligned}
+\mathbb{E}\bigl[I(x \mid x_{n+1}) \mid D_n\bigr]
+= \bigl(y_{n_{\min}} - \mu_n(x)\bigr)\,
+\Phi\!\Bigl(\frac{y_{n_{\min}} - \mu_n(x)}{\sigma_{n+1}(x)}\Bigr)
++ 
+\sigma_{n+1}(x)\,
+\phi\!\Bigl(\frac{y_{n_{\min}} - \mu_n(x)}{\sigma_{n+1}(x)}\Bigr).
+\end{aligned}
+$$
+
+## 
+
+The integrated expected conditional improvement:
+
+$$
+\mathrm{IECI}(x_{n+1}) = -\int_{x\in \mathfrak{X}}\mathrm{E}\{I(x|x_{n+1})|D_n\}w(x)dx
+$$
+
+- $w(x)$ plays an important role to control available regions.
+
+## Intuition behind IECI 
+
+- It does not measure improvement directly at $x_{n+1}$, as EI does.
+- IECI assesses it at a reference point $x$ under the hypothetical scenario that $x_{n+1}$ is added into the design. 
+- If $x$ still has high improvement  after $x_{n+1}$ has been added in, then $x_{n+1}$ must not have had much influence on potential for improvement at $x$.
+- If $x_{n+1}$ is influential at $x$, then improvement at $x$ should be small after $x_{n+1}$ is added in, not large. 
+
+##
+
+![](22.png){fig-align="center" width="70%"}
+
+
+## Discussion
+
+- Main issues remains in BO
+  - What to do with the hyperparameters of the model?
+  - How to select points to initialize the model?
+  - How to optimize the acquisition function?
+- Without constraints, IECI is not superior to EI.
+- This method may be extended and improved as we consider white noise.
+- We can also consider multi-task and multi-objective BO. 
+
+
+
+
+
+
+
+
