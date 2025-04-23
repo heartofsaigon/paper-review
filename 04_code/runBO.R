@@ -1,11 +1,8 @@
-
-
 rm(list = ls())
-par(mfrow = c(1,1))
 
 if(!library(pacman, logical.return = T)) install.packages("pacman")
-pacman::p_load(tidyverse, plotly, hetGP, laGP, plgp, HDInterval, matrixcalc)
-
+pacman::p_load(tidyverse, hetGP, laGP, plgp, HDInterval, matrixcalc)
+par(mfrow = c(1,1))
 
 
 ##########################################################
@@ -15,7 +12,7 @@ pacman::p_load(tidyverse, plotly, hetGP, laGP, plgp, HDInterval, matrixcalc)
 # the main function for illustration and its curve
 simpleFunction <- function(x) -6*dnorm(x,4) - 7.5*dnorm(x,7)+2
 
-curve(simpleFunction, xlim = c(0,10), ylim = c(-3,3) )
+curve(simpleFunction, xlim = c(0,10), ylim = c(-3,3))
 # using standard R numerical algorithm to optimise the function
 op<- optimise(simpleFunction, interval = c(0,10)); op
 abline(v = op$minimum, h = op$objective)
