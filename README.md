@@ -17,6 +17,7 @@ The Slide deck and report can be found in the following links.
 
 `03_papers`: The two main papers reviewed.
 
-
+`04_code`: The only file `runBO_v2.R` includes codes for defining the object function and optimizing the function using both `optimize` function and BO algorithm.
+This code is only used for BO with EI acquisition function. Extensions, such as CBO or additional hyper-parameters, are possible by modifying this code.  
 
 
