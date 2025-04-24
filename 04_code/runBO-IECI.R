@@ -12,7 +12,6 @@ par(mfrow = c(1,1))
 # the main function for illustration and its curve
 simpleFunction <- function(x) -6*dnorm(x,4) - 7.5*dnorm(x,7)+1.3
 
-
 curve(simpleFunction, xlim = c(0,10), ylim = c(-3,3))
 # using standard R numerical algorithm to optimise the function
 op<- optimise(simpleFunction, interval = c(0,10)); op
@@ -65,14 +64,9 @@ ind = which.max(EI)
 X_dat = c(X_dat, X_pr[ind])
 
 stopit = 0
-iter = 0
-
-par(mfrow = c(3,2))
-#png(filename= paste0("01_report/", iter,".png"))
 repeat{
-  iter = iter +1
   Y_dat = simpleFunction(X_dat)
-
+  
   D_dat = plgp::distance(X_dat)
   S_dat = exp(-D_dat) + diag(.Machine$double.eps, length(X_dat))
   
@@ -82,32 +76,30 @@ repeat{
   
   mu = S_pr_dat%*%solve(S_dat)%*%as.matrix(Y_dat)
   covmat = S_pr - S_pr_dat%*%solve(S_dat)%*%t(S_pr_dat)
-
+  
   
   Sys.sleep(0.7)
   #par(mfrow = c(1,1))
-  if(iter %in% c(1,4,7,10,13,14)){
-    
-  curve(simpleFunction, xlim = c(0,10), ylim = c(-3,3), lwd = 3, main = paste("iteration: ",iter))
+  curve(simpleFunction, xlim = c(0,10), ylim = c(-3,3), lwd = 3)
   
   points(as.matrix(X_dat), as.matrix(Y_dat), pch = 16, col = "red")
   points(X_dat[length(X_dat)], Y_dat[length(Y_dat)], pch = 16, col = "blue")
   
-
+  
+  # lower = mu - qnorm(.975)*sqrt(diag(covmat))
+  # upper = mu + qnorm(.975)*sqrt(diag(covmat))
   lines(X_pr, mu, col = "red", lty = 1)
   
   interval<-
-  rmvnorm(2000, as.matrix(mu), covmat)|>
+    rmvnorm(2000, as.matrix(mu), covmat)|>
     apply(2, \(i) quantile(i, c(0.025, 0.975)))
   lower = interval[1,]
   upper = interval[2,]
   
   lines(X_pr, lower, col = "red", lty = 3)
   lines(X_pr, upper, col = "red", lty = 3)
-  }
   
-
- 
+  
   
   
   f_min = min(Y_dat)
@@ -127,24 +119,9 @@ repeat{
   }
   if(stopit ==1) break
   X_dat = c(X_dat, X_pr[ind])
-
+  
 }
-
-#dev.off()
-
-#plot 
-par(mfrow = c(1,1))
-curve(simpleFunction, xlim = c(0,10), ylim = c(-3,3), lwd = 3)
-
-m = cbind(X_dat, Y_dat)[order(Y_dat),]
-
-# Set up an empty plot with appropriate limits
-points(range(m[,1]), c(0, max(m[,2])),
-     type = "n", xlab = "x", ylab = "y", ylim = c(-3,3))
-segments(x0 = m[,1], y0 = -3,
-         x1 = m[,1], y1 = m[,2])
-points(m[,1], m[,2], pch = 16, col = "red")
-abline(h = -3, lty = 2, col = "gray")  # optional reference line
+cbind(X_dat, Y_dat)[order(Y_dat),]
 ############
 #######################
 ##############################################
