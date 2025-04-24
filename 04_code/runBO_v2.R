@@ -8,7 +8,6 @@ par(mfrow = c(1,1))
 ##########################################################
 ##########################################################
 ##########################################################
-# Add scale and nugget 
 # the main function for illustration and its curve
 simpleFunction <- function(x) -6*dnorm(x,4) - 7.5*dnorm(x,7)+1.3
 
@@ -18,8 +17,6 @@ curve(simpleFunction, xlim = c(0,10), ylim = c(-3,3))
 op<- optimise(simpleFunction, interval = c(0,10)); op
 abline(v = op$minimum, h = op$objective)
 
-# using one-step-ahead updates 
-set.seed(1)
 
 # prior - before observing any data point
 X_pr = seq(0, 10, length = 100)|> sort()
@@ -57,43 +54,34 @@ lines(X_pr, lower, col = "red", lty = 2)
 lines(X_pr, upper, col = "red", lty = 2)
 ###
 
-f_min = min(Y_dat)
+f_min = min(Y_dat) # choose the current minimum point
+# calculate EI
 EI = (f_min - mu)*pnorm((f_min-mu)/diag(covmat)) + 
   diag(covmat)*dnorm((f_min-mu)/diag(covmat))
-#plot(X_pr, EI, type = "l") 
-ind = which.max(EI)
-X_dat = c(X_dat, X_pr[ind])
+ind = which.max(EI) # obtain the location of minimum point
+X_dat = c(X_dat, X_pr[ind]) # update the design
 
 stopit = 0
 iter = 0
-
-par(mfrow = c(3,2))
-#png(filename= paste0("01_report/", iter,".png"))
 repeat{
   iter = iter +1
-  Y_dat = simpleFunction(X_dat)
-
+  Y_dat = simpleFunction(X_dat) # evaluate the new design
   D_dat = plgp::distance(X_dat)
   S_dat = exp(-D_dat) + diag(.Machine$double.eps, length(X_dat))
   
   # posterior
   D_pr_dat = plgp::distance(X_pr, X_dat)
   S_pr_dat = exp(-D_pr_dat)
-  
   mu = S_pr_dat%*%solve(S_dat)%*%as.matrix(Y_dat)
   covmat = S_pr - S_pr_dat%*%solve(S_dat)%*%t(S_pr_dat)
 
   
   Sys.sleep(0.7)
-  #par(mfrow = c(1,1))
-  if(iter %in% c(1,4,7,10,13,14)){
-    
+
   curve(simpleFunction, xlim = c(0,10), ylim = c(-3,3), lwd = 3, main = paste("iteration: ",iter))
-  
   points(as.matrix(X_dat), as.matrix(Y_dat), pch = 16, col = "red")
   points(X_dat[length(X_dat)], Y_dat[length(Y_dat)], pch = 16, col = "blue")
   
-
   lines(X_pr, mu, col = "red", lty = 1)
   
   interval<-
@@ -104,10 +92,6 @@ repeat{
   
   lines(X_pr, lower, col = "red", lty = 3)
   lines(X_pr, upper, col = "red", lty = 3)
-  }
-  
-
- 
   
   
   f_min = min(Y_dat)
@@ -117,34 +101,26 @@ repeat{
   
   ind = which.max(EI)
   j=1
-  while(X_pr[ind] %in% X_dat){
+  while(X_pr[ind] %in% X_dat){ # this avoids choosing the locations that were evaluated
     j =j+1
     ind = order(max(EI)- EI)[2]
-    if(j>5){
+    if(j>5){ # after 5 times, if we can't find the locations that haven't evaluated, we stop
       stopit = 1
       break
     }
   }
   if(stopit ==1) break
   X_dat = c(X_dat, X_pr[ind])
-
 }
 
-#dev.off()
+# final design
+cbind(X_dat, Y_dat)[order(Y_dat),]
 
-#plot 
-par(mfrow = c(1,1))
-curve(simpleFunction, xlim = c(0,10), ylim = c(-3,3), lwd = 3)
 
-m = cbind(X_dat, Y_dat)[order(Y_dat),]
 
-# Set up an empty plot with appropriate limits
-points(range(m[,1]), c(0, max(m[,2])),
-     type = "n", xlab = "x", ylab = "y", ylim = c(-3,3))
-segments(x0 = m[,1], y0 = -3,
-         x1 = m[,1], y1 = m[,2])
-points(m[,1], m[,2], pch = 16, col = "red")
-abline(h = -3, lty = 2, col = "gray")  # optional reference line
+
+
+
 ############
 #######################
 ##############################################
