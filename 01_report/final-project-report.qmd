@@ -55,7 +55,7 @@ execute:
 
 # Summary 
 
-The central theme of this review is Bayesian Optimization (BO). We will primarily focus on *Bayesian Optimization* by Frazier @frazier2018bayesian while also considering *Optimization Under Unknown Constraints* by Gramacy et al. @bernardo2011optimization The latter serves as an important extension of BO, particularly in addressing constraints. 
+The central theme of this review is Bayesian Optimization (BO). We will primarily focus on *Bayesian Optimization* by Frazier @frazier2018bayesian while also considering *Optimization Under Unknown Constraints* by Gramacy et al. @bernardo2011optimization The latter serves as an essential extension of BO, particularly in addressing constraints. 
 
 The primary objective of the first study is to introduce how Bayesian optimization works, including Gaussian Process (GP) regression and three standard acquisition functions: expected improvement (EI), entropy search (ES), and knowledge gradient (KG), but the focus is the first two functions. The paper also discussed more advanced techniques, including expensive-to-evaluate constraint functions, which were discussed in detail in the second paper. BO is a class of machine-learning-based optimization methods designed for functions with expensive evaluations or a lack of a known special structure. Thus, BO is utilized for black-box derivative-free global optimization. 
 
@@ -73,13 +73,13 @@ Although GP is used in most work on BO, this assumption may not be true for appl
 
 # Application
 
-As the first paper provided the basic pseudo-code of BO, we will define a function to optimize using BO and R built-in function `optimize` and compare the results. We define the following function
+As the first paper provided the basic pseudo-code of BO, we will define a function to optimize using BO and the R built-in function `optimize` and compare the results. We define the following function.
 $$
 f(x) = -6\times\mathrm \phi(x|4,1) - 7.5\times\mathrm \phi(x|7,1) + 1.3,
 $$
 where $\phi$ denotes the standard normal density function. We begin by optimizing the objective function using `optimize`. Subsequently, we apply BO with the EI acquisition function and compare the outcomes of both approaches.
 
-In this setup, GP model includes only an intercept term set to zero. The covariance function is defined as the exponential of the negative squared Euclidean distance, i.e., $\exp{-(x - x')^2}$ for all $x, x' \in \mathcal{X}$. We assume noise-free evaluations, meaning that the objective function is observed without measurement error.
+In this setup, the GP model includes only an intercept term set to zero. The covariance function is defined as the exponential of the negative squared Euclidean distance, i.e., $\exp{-(x - x')^2}$ for all $x, x' \in \mathcal{X}$. We assume noise-free evaluations, meaning the objective function is observed without measurement error.
 
 @fig-a01 illustrates the objective function (solid black curve), a set of sample functions (dashed grey curves) drawn from the prior Gaussian process before any observations are made, and the corresponding 95% credible intervals (dashed red lines). Notably, the objective function remains within the credible intervals across the entire domain, indicating that the surrogate model captures the potential range of the objective function well. This supports achieving the objective function values using the chosen surrogate model. The black horizontal and vertical line indicate the optimal point (local optimal) and its value obtained using the `R` built-in function. 
 
